@@ -3,6 +3,7 @@ from discord.ext import commands
 import os
 from dotenv import load_dotenv
 
+TOKEN = os.getenv("BOT_TOKEN")
 load_dotenv()  # loads .env file into environment variables
 
 intents = discord.Intents.default()
@@ -58,4 +59,4 @@ async def register(ctx):
     await channel.send(f"👋 Welcome {user.mention}!\nThis is your private workspace. You can submit drafts, ask questions, or track your work here.")
     await ctx.send(f"{user.mention} Your private channel has been created: {channel.mention}")
 
-bot.run(os.getenv("BOT_TOKEN"))
+bot.run(TOKEN)
