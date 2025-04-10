@@ -1,7 +1,32 @@
+from flask import Flask
+from threading import Thread
+
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "Bot is alive!"
+
+def run():
+    app.run(host='0.0.0.0', port=8080)
+
+def keep_alive():
+    t = Thread(target=run)
+    t.start()
+
+
+
+
+
+
+
+
 import discord
 from discord.ext import commands
 import os
 from dotenv import load_dotenv
+import asyncio
+
 
 TOKEN = os.getenv("BOT_TOKEN")
 load_dotenv()  # loads .env file into environment variables
@@ -59,4 +84,5 @@ async def register(ctx):
     await channel.send(f"👋 Welcome {user.mention}!\nThis is your private workspace. You can submit drafts, ask questions, or track your work here.")
     await ctx.send(f"{user.mention} Your private channel has been created: {channel.mention}")
 
+keep_alive()
 bot.run(TOKEN)
