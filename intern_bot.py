@@ -1,5 +1,9 @@
 import discord
 from discord.ext import commands
+import os
+from dotenv import load_dotenv
+
+load_dotenv()  # loads .env file into environment variables
 
 intents = discord.Intents.default()
 intents.members = True
@@ -54,4 +58,4 @@ async def register(ctx):
     await channel.send(f"👋 Welcome {user.mention}!\nThis is your private workspace. You can submit drafts, ask questions, or track your work here.")
     await ctx.send(f"{user.mention} Your private channel has been created: {channel.mention}")
 
-bot.run("MTM1OTk1MDU1NjY2MzEyMDA3Mw.GUAODM.b5rg5zlJmHhVGAxt4grT9wN4wG7tH85Rszyrfs")
+bot.run(os.getenv("BOT_TOKEN"))
