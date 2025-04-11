@@ -47,6 +47,13 @@ async def on_ready():
 
 @bot.command()
 async def register(ctx):
+
+    allowed_channel_name = "🖊intern-registration"  # Replace with your exact channel name
+
+    if ctx.channel.name != allowed_channel_name:
+        await ctx.send(f"{ctx.author.mention} ❌ This command can only be used in **#{allowed_channel_name}**.")
+        return
+    
     guild = ctx.guild
     user = ctx.author
     existing_channel_name = f"intern-{user.name.lower()}"
@@ -95,7 +102,7 @@ Here’s a list of commands you can use to navigate your internship smoothly:
 
 🔹 `!register`  
 Create your own **private channel** to submit work and chat with your lead.  
-> 🗂️ Usable from **anywhere**
+> 🗂️ Usable only in **🖊intern-registration**
 
 🔹 `!hello`  
 Triggers your personalized welcome message and onboarding guide.  
@@ -103,7 +110,7 @@ Triggers your personalized welcome message and onboarding guide.
 
 🔹 `!resources`  
 Get the team calendar, asset library, and meeting notes all in one embed.  
-> 📚 Use only in **#intern-info**
+> 📚 Use only in **📚-intern-resources-hub**
 
 🔹 `!command`  
 Display this list of available bot commands.  
@@ -130,12 +137,20 @@ async def hello(ctx):
         await ctx.send(f"{user.mention}, please use this command in {welcome_channel.mention}.")
         return
 
-    # Delete all messages in the welcome channel
+    preserved_message = (
+        'If this is your first time here, type !hello to get started. \n'
+        'Note: Make sure to include the exclamation mark before the word "hello" — like this: !hello.'
+    )
+
+    # Delete all messages except the preserved one
     async for message in welcome_channel.history(limit=100):
         try:
-            await message.delete()
+            if message.content.strip() != preserved_message.strip():
+                await message.delete()
         except discord.Forbidden:
             pass
+        except Exception as e:
+            print(f"Error deleting message: {e}")
 
     # Personalized welcome message
     welcome_text = f"""
@@ -155,10 +170,10 @@ async def hello(ctx):
     🎉 Time to make your grand entrance!
     Hop into #general-social-team and tell us all the juicy stuff. We wanna know:
 
-    🙋‍♀️ Your name
-    😂 One funny/quirky thing about you (Do you talk to plants? Collect weird mugs? We’re all ears!)
-    🌟 One thing you’re really proud of (Could be a skill, a trait, or just being a great plant parent 🌱)
-    🎯 What you're here to learn during your time with us
+    🙋‍♀️ Your name  
+    😂 One funny/quirky thing about you (Do you talk to plants? Collect weird mugs? We’re all ears!)  
+    🌟 One thing you’re really proud of (Could be a skill, a trait, or just being a great plant parent 🌱)  
+    🎯 What you're here to learn during your time with us  
 
     No pressure, just good vibes. Can’t wait to get to know the awesome human behind the name! ✨
 
@@ -177,10 +192,8 @@ async def hello(ctx):
     **Welcome aboard, {user.display_name}! You’ve got this! 🌟**
     """
 
-
-    # Send message to channel
     msg = await welcome_channel.send(welcome_text)
-    await msg.add_reaction("💙")  # Reaction for personal touch
+    await msg.add_reaction("💙")
 
     # Try DMing the user
     try:
