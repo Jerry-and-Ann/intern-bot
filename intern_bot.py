@@ -175,7 +175,7 @@ async def hello(ctx):
 @bot.command(name='resources')
 async def resources(ctx):
     embed = discord.Embed(
-        title="📚-intern-resources-hub",
+        title="📚 Intern Resources Hub",
         description="Here are your important working links to stay organized and efficient:",
         color=discord.Color.blue()
     )
