@@ -88,13 +88,13 @@ async def register(ctx):
 
 
 # 1. Help Command
-@bot.command(name='help')
+@bot.command(name='command')
 async def help_command(ctx):
     help_text = """
 **🛠️ Jerry&Ann Intern Bot Commands**
 
 `!register` - Create your own private channel to submit work and ask questions.
-`!hello` - Get the welcome message and onboarding guide.
+`!command` - Get the welcome message and onboarding guide.
 `!calendar` - Get access to the project calendar.
 `!help` - Display this list of commands.
 """
@@ -103,7 +103,7 @@ async def help_command(ctx):
 # 2. Hello Command
 WELCOME_CHANNEL_NAME = "welcome-hall"  # Replace with your actual channel name
 
-@bot.command(name='command')
+@bot.command(name='hello')
 async def hello(ctx):
     welcome_channel = discord.utils.get(ctx.guild.text_channels, name=WELCOME_CHANNEL_NAME)
     user = ctx.author
