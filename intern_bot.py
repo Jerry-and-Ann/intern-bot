@@ -206,8 +206,41 @@ async def resources(ctx):
     await message.delete()
 
 
+# 
+#   For Clearing all bot commands
+# 
+
+@bot.event
+async def on_ready():
+    print(f"Bot connected as {bot.user}")
+    bot.loop.create_task(delete_old_commands())
+
+async def delete_old_commands():
+    await bot.wait_until_ready()
+    while not bot.is_closed():
+        for guild in bot.guilds:
+            for channel in guild.text_channels:
+                try:
+                    async for message in channel.history(limit=50):  # Adjust limit as needed
+                        if message.content.startswith('!') and not message.author.bot:
+                            time_diff = (discord.utils.utcnow() - message.created_at).total_seconds()
+                            if time_diff > 120:
+                                await message.delete()
+                except Exception as e:
+                    print(f"Error in channel {channel.name}: {e}")
+        await asyncio.sleep(60)  # Repeat every minute
 
 
+
+
+
+
+
+
+
+
+
+# Run Commands
 
 
 keep_alive() # Ignore this command keep it unchanged
