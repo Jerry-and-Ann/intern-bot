@@ -94,9 +94,9 @@ async def help_command(ctx):
 **🛠️ Jerry&Ann Intern Bot Commands**
 
 `!register` - Create your own private channel to submit work and ask questions.
-`!command` - Get the welcome message and onboarding guide.
-`!calendar` - Get access to the project calendar.
-`!help` - Display this list of commands.
+`!hello` - Get the welcome message and onboarding guide.
+`!resources` - Get access to the project calendar.
+`!command` - Display this list of commands.
 """
     await ctx.send(help_text)
 
@@ -121,31 +121,44 @@ async def hello(ctx):
 
     # Personalized welcome message
     welcome_text = f"""
-👋 **Hey {user.display_name}, welcome to the Jerry&Ann Social Media HQ!**
+    👋 **Hey {user.display_name}, welcome to the Jerry&Ann Social Media HQ!**  
 
-We're beyond excited to have you join our creative intern squad! Here’s your getting-started guide:
+    We're absolutely thrilled to have you as part of our vibrant intern squad! This is your launchpad to a creative and collaborative journey. 🚀
 
-🔹 **Step 1: Read the Rules**  
-Check out **#rules** to understand what’s cool and what’s not.
+    Here’s everything you need to get started:
 
-🔹 **Step 2: Assign Your Role**  
-(Use Carl-bot reactions if available or wait for a manual role from an Admin.)
+    🔹 **Step 1: Read the Rules**  
+    Head over to **#rules** to understand what’s encouraged and what to avoid — we keep it chill, respectful, and fun.
 
-🔹 **Step 3: Explore the Channels**  
-You’ll see platform-specific spaces like **#instagram-team**, **#reels-editing**, and more based on your work.
+    🔹 **Step 2: Claim Your Private Channel**  
+    Jump into **#intern-assigning** and type `!register`. This creates your **own private workspace** where you can talk to your Manager, Team Lead, or even the Founders directly.
 
-🔹 **Step 4: Check for Tasks**  
-Pop into **#tasks-board** for your weekly goals, briefs, and updates.
+    🔹 **Step 3: Say Hello to the Team**  
+    🎉 Time to make your grand entrance!
+    Hop into #general-social-team and tell us all the juicy stuff. We wanna know:
 
-🔹 **Step 5: Say Hello!**  
-Hop into **#general-social-team** and introduce yourself – name, college, and your favorite social media platform!
+    🙋‍♀️ Your name
+    😂 One funny/quirky thing about you (Do you talk to plants? Collect weird mugs? We’re all ears!)
+    🌟 One thing you’re really proud of (Could be a skill, a trait, or just being a great plant parent 🌱)
+    🎯 What you're here to learn during your time with us
 
-💡 *Pro Tip:*  
-Admins and Team Leads are always here if you’re unsure about anything. Don’t hesitate to reach out!
+    No pressure, just good vibes. Can’t wait to get to know the awesome human behind the name! ✨
 
-Let’s make **Jerry&Ann** shine online 💙  
-**Welcome aboard, {user.display_name}!** 🚀
-"""
+    🔹 **Step 4: Explore the Channels**  
+    You’ll find dedicated spaces like **#instagram-team**, **#linkedin-team**, and more — each one tailored to different projects and content styles.
+
+    🔹 **Step 5: Check Your Task Channel**  
+    Head to **#tasks-board** — that’s where team's briefs, assignments, and weekly goals will appear.
+
+    💡 **Pro Tip:**  
+    Stuck? Unsure? Curious? The **Admins** and **Leads** are just a ping away. Never hesitate to ask for help or share ideas!
+
+    ---
+
+    Let’s create something awesome together and make **Jerry&Ann** shine online 💙  
+    **Welcome aboard, {user.display_name}! You’ve got this! 🌟**
+    """
+
 
     # Send message to channel
     msg = await welcome_channel.send(welcome_text)
@@ -158,11 +171,40 @@ Let’s make **Jerry&Ann** shine online 💙
         await welcome_channel.send(f"{user.mention}, I couldn’t DM you the welcome guide. Please check your privacy settings.")
 
 
+# Resources
+@bot.command(name='resources')
+async def resources(ctx):
+    embed = discord.Embed(
+        title="📚 Intern Resources Hub",
+        description="Here are your important working links to stay organized and efficient:",
+        color=discord.Color.blue()
+    )
 
-# 3. Calendar Command
-@bot.command(name='calendar')
-async def calendar(ctx):
-    await ctx.send("📅 Here's the team calendar: https://your-calendar-link.com (Replace with actual link)")
+    embed.add_field(
+        name="📅 Calendar",
+        value="[Click Me](https://cheddar-random-832.notion.site/1d2516692e2180ac8302d47718730784?v=1d2516692e218088a1e1000ccff9189e)\nTrack all key dates, deadlines, and upcoming events.",
+        inline=False
+    )
+
+    embed.add_field(
+        name="🧰 Assets Library",
+        value="[Click Me](https://cheddar-random-832.notion.site/1d2516692e218079bd15f6115b5ffa01?v=1d2516692e21806785a0000cf3ce28cd)\nAccess logos, templates, design files, and more.",
+        inline=False
+    )
+
+    embed.add_field(
+        name="📝 Meeting Notes",
+        value="[Click Me](https://cheddar-random-832.notion.site/1d2516692e21805d8d44f4a9bb243ca1?v=1d2516692e2180f99c71000c1d12491a)\nCatch up on discussion points, action items, and decisions.",
+        inline=False
+    )
+
+    embed.set_footer(text="Keep these links handy! Let’s stay aligned and creative 💡")
+
+    # Send the embed and delete it after 60 seconds
+    message = await ctx.send(embed=embed)
+    await asyncio.sleep(60)
+    await message.delete()
+
 
 
 
