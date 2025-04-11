@@ -91,7 +91,6 @@ async def register(ctx):
 async def help_command(ctx):
     help_text = """
 **📘 Jerry&Ann Intern Bot — Command Guide**
-
 Here’s a list of commands you can use to navigate your internship smoothly:
 
 🔹 `!register`  
@@ -109,8 +108,6 @@ Get the team calendar, asset library, and meeting notes all in one embed.
 🔹 `!command`  
 Display this list of available bot commands.  
 > 📌 Usable from **anywhere**
-
----
 
 💡 *Tip:* Use these commands wisely! Some are designed for specific channels to keep things tidy and focused.
 """
@@ -192,9 +189,14 @@ async def hello(ctx):
         await welcome_channel.send(f"{user.mention}, I couldn’t DM you the welcome guide. Please check your privacy settings.")
 
 
-# Resources
 @bot.command(name='resources')
 async def resources(ctx):
+    allowed_channel_name = "📚-intern-resources-hub"  # Replace with your exact channel name
+
+    if ctx.channel.name != allowed_channel_name:
+        await ctx.send(f"{ctx.author.mention} ❌ This command can only be used in **#{allowed_channel_name}**.")
+        return
+
     embed = discord.Embed(
         title="📚 Intern Resources Hub",
         description="Here are your important working links to stay organized and efficient:",
@@ -221,10 +223,11 @@ async def resources(ctx):
 
     embed.set_footer(text="Keep these links handy! Let’s stay aligned and creative 💡")
 
-    # Send the embed and delete it after 60 seconds
     message = await ctx.send(embed=embed)
     await asyncio.sleep(60)
     await message.delete()
+    await ctx.message.delete()
+
 
 
 # 
