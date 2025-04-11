@@ -101,7 +101,7 @@ async def help_command(ctx):
     await ctx.send(help_text)
 
 # 2. Hello Command
-WELCOME_CHANNEL_NAME = "welcome-hall"  # Replace with your actual channel name
+WELCOME_CHANNEL_NAME = "🎟welcome-hall"  # Replace with your actual channel name
 
 @bot.command(name='hello')
 async def hello(ctx):
