@@ -137,15 +137,10 @@ async def hello(ctx):
         await ctx.send(f"{user.mention}, please use this command in {welcome_channel.mention}.")
         return
 
-    preserved_message = (
-        'If this is your first time here, type `!hello` to get started.\n' 
-        'Note: Make sure to include the exclamation mark before the word "hello" — like this: `!hello.`'
-    )
-
-    # Delete all messages except the preserved one
+    # Delete all non-pinned messages
     async for message in welcome_channel.history(limit=100):
         try:
-            if message.content.strip() != preserved_message.strip():
+            if not message.pinned:
                 await message.delete()
         except discord.Forbidden:
             pass
@@ -200,6 +195,7 @@ async def hello(ctx):
         await user.send(welcome_text)
     except discord.Forbidden:
         await welcome_channel.send(f"{user.mention}, I couldn’t DM you the welcome guide. Please check your privacy settings.")
+
 
 
 @bot.command(name='resources')
