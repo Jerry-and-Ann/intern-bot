@@ -138,8 +138,8 @@ async def hello(ctx):
         return
 
     preserved_message = (
-        'If this is your first time here, type !hello to get started. \n'
-        'Note: Make sure to include the exclamation mark before the word "hello" — like this: !hello.'
+        'If this is your first time here, type `!hello` to get started.\n' 
+        'Note: Make sure to include the exclamation mark before the word "hello" — like this: `!hello.`'
     )
 
     # Delete all messages except the preserved one
