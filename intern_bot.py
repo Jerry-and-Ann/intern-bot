@@ -87,18 +87,39 @@ async def register(ctx):
 
 
 
-# 1. Help Command
 @bot.command(name='command')
 async def help_command(ctx):
     help_text = """
-**🛠️ Jerry&Ann Intern Bot Commands**
+**📘 Jerry&Ann Intern Bot — Command Guide**
 
-`!register` - Create your own private channel to submit work and ask questions.
-`!hello` - Get the welcome message and onboarding guide.
-`!resources` - Get access to the project calendar.
-`!command` - Display this list of commands.
+Here’s a list of commands you can use to navigate your internship smoothly:
+
+🔹 `!register`  
+Create your own **private channel** to submit work and chat with your lead.  
+> 🗂️ Usable from **anywhere**
+
+🔹 `!hello`  
+Triggers your personalized welcome message and onboarding guide.  
+> 🛎️ Use only in **#🎟welcome-hall**
+
+🔹 `!resources`  
+Get the team calendar, asset library, and meeting notes all in one embed.  
+> 📚 Use only in **#intern-info**
+
+🔹 `!command`  
+Display this list of available bot commands.  
+> 📌 Usable from **anywhere**
+
+---
+
+💡 *Tip:* Use these commands wisely! Some are designed for specific channels to keep things tidy and focused.
 """
-    await ctx.send(help_text)
+    # Send the help message and delete after 70 seconds
+    message = await ctx.send(help_text)
+    await asyncio.sleep(70)
+    await message.delete()
+    await ctx.message.delete()
+
 
 # 2. Hello Command
 WELCOME_CHANNEL_NAME = "🎟welcome-hall"  # Replace with your actual channel name
