@@ -103,7 +103,7 @@ async def help_command(ctx):
 # 2. Hello Command
 WELCOME_CHANNEL_NAME = "welcome-hall"  # Replace with your actual channel name
 
-@bot.command(name='hello')
+@bot.command(name='command')
 async def hello(ctx):
     welcome_channel = discord.utils.get(ctx.guild.text_channels, name=WELCOME_CHANNEL_NAME)
     user = ctx.author
