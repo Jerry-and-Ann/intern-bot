@@ -1,5 +1,15 @@
+# -------------------------- KEEP_ALIVE SETUP --------------------------
 from flask import Flask
 from threading import Thread
+import discord
+from discord.ext import commands
+from discord import app_commands, Interaction, ButtonStyle
+from discord.ui import View, Button
+import os
+from dotenv import load_dotenv
+import asyncio
+from datetime import datetime
+from google_sheets import sheet  # Import sheet object from google_sheets.py
 
 app = Flask('')
 
@@ -14,26 +24,76 @@ def keep_alive():
     t = Thread(target=run)
     t.start()
 
-
-
-
-
-
-
-
-import discord
-from discord.ext import commands
-import os
-from dotenv import load_dotenv
-import asyncio
-
-
+# -------------------------- DISCORD & ENV --------------------------
+load_dotenv()
 TOKEN = os.getenv("BOT_TOKEN")
-load_dotenv()  # loads .env file into environment variables
 
 intents = discord.Intents.default()
 intents.members = True
-intents.message_content = True  # Required to read messages
+intents.message_content = True
+
+bot = commands.Bot(command_prefix='!', intents=intents)
+
+# ---------------- ATTENDANCE COMMAND ----------------
+class AttendanceView(View):
+    def __init__(self, user):
+        super().__init__(timeout=180)
+        self.user = user
+
+    @discord.ui.button(label="✅ Present", style=ButtonStyle.success)
+    async def present_button(self, interaction: Interaction, button: Button):
+        if interaction.user != self.user:
+            await interaction.response.send_message("This isn’t your attendance form.", ephemeral=True)
+            return
+        await self.mark_attendance("Present")
+        await interaction.response.send_message("✅ Marked as Present!", ephemeral=True)
+        self.stop()
+
+    @discord.ui.button(label="❌ Absent", style=ButtonStyle.danger)
+    async def absent_button(self, interaction: Interaction, button: Button):
+        if interaction.user != self.user:
+            await interaction.response.send_message("This isn’t your attendance form.", ephemeral=True)
+            return
+        await interaction.response.send_message("Please reply with the reason for your absence.", ephemeral=True)
+
+        def check(msg):
+            return msg.author == self.user and msg.channel == interaction.channel
+
+        try:
+            msg = await bot.wait_for('message', check=check, timeout=60)
+            await self.mark_attendance("Absent", msg.content)
+            await interaction.followup.send("❌ Marked as Absent with reason!", ephemeral=True)
+        except asyncio.TimeoutError:
+            await interaction.followup.send("⏰ Timed out. Please try again.", ephemeral=True)
+        self.stop()
+
+    @discord.ui.button(label="😶 No Response", style=ButtonStyle.secondary)
+    async def no_response_button(self, interaction: Interaction, button: Button):
+        if interaction.user != self.user:
+            await interaction.response.send_message("This isn’t your attendance form.", ephemeral=True)
+            return
+        await self.mark_attendance("No Response")
+        await interaction.response.send_message("😶 Marked as No Response.", ephemeral=True)
+        self.stop()
+
+    async def mark_attendance(self, status, reason=""):
+        now = datetime.now()
+        timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
+        row = [self.user.display_name, self.user.name, status, reason, timestamp]
+        sheet.append_row(row)
+
+@bot.command()
+async def attendance(ctx):
+    view = AttendanceView(ctx.author)
+    await ctx.send(f"📋 {ctx.author.mention}, kindly mark your attendance:", view=view)
+
+# ---------------- YOUR EXISTING COMMANDS (UNCHANGED) ----------------
+# [All your previous bot commands go here unchanged: !register, !command, !hello, !resources, cleanup, etc.]
+
+# ✅ You can paste your previous commands here exactly as is.
+# ✅ I left them out for brevity. Let me know if you'd like me to combine them here too!
+
+# ---------------- RUN BOT ----------------
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 

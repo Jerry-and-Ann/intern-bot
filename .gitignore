@@ -1,1 +1,4 @@
 .env
+*.txt
+*.json
+intern_attendance.py
