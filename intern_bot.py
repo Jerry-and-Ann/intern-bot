@@ -11,6 +11,7 @@ import asyncio
 from datetime import datetime, time
 import pytz
 from google_sheets import sheet  # Import sheet object from google_sheets.py
+from gspread_formatting.dataframe import format_with_dataframe
 
 app = Flask('')
 
@@ -80,11 +81,39 @@ class AttendanceView(View):
         await interaction.response.send_message("😶 Marked as No Response.", ephemeral=True)
         self.stop()
 
+    from gspread_formatting import (
+        CellFormat, Color, TextFormat, set_frozen, format_cell_range, set_column_width
+    )
+    from gspread_formatting.dataframe import format_with_dataframe
+
+
     async def mark_attendance(self, status, reason=""):
         now = datetime.now(pytz.timezone("Asia/Kolkata"))  # Set timezone
         timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
         row = [self.user.display_name, self.user.name, status, reason, timestamp]
-        sheet.append_row(row)
+
+        worksheet = sheet  # assuming `sheet` is already your authorized worksheet
+
+        # Check and write headers only once
+        if worksheet.row_count == 0 or not worksheet.get_all_values():
+            headers = ["Display Name", "Username", "Status", "Reason", "Timestamp"]
+            worksheet.append_row(headers)
+
+            # Apply formatting to header row
+            header_format = CellFormat(
+                backgroundColor=Color(0.9, 0.9, 0.9),
+                textFormat=TextFormat(bold=True),
+            )
+            format_cell_range(worksheet, 'A1:E1', header_format)
+            set_frozen(worksheet, rows=1)
+
+            # Optionally set column widths
+            for i, width in enumerate([150, 150, 100, 300, 180], start=1):
+                set_column_width(worksheet, i, width)
+
+        # Add the attendance entry
+        worksheet.append_row(row)
+
 
 
 # ---- Manual Command ----
