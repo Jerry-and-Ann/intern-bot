@@ -93,14 +93,14 @@ async def attendance(ctx):
     user = ctx.author
     channel = ctx.channel
 
-    # expected_channel_name = f"intern-{user.name.lower().replace(' ', '-')}"
-    expected_channel_name = f"intern-{user.id}"
-    if channel.name != expected_channel_name:
+    # Fuzzy check instead of exact match
+    if not channel.name.endswith(user.name.lower()):
         await ctx.send("⚠️ You can only mark attendance in your own intern channel.")
         return
 
     view = AttendanceView(user)
     await ctx.send(f"📋 {user.mention}, kindly mark your attendance:", view=view)
+
 
 
 # ---- Daily Scheduler ----
