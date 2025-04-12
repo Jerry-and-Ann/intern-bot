@@ -29,12 +29,15 @@ load_dotenv()
 TOKEN = os.getenv("BOT_TOKEN")
 
 intents = discord.Intents.default()
-intents.members = True
+intents.messages = True
+intents.guilds = True
 intents.message_content = True
+intents.members = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 # ---------------- ATTENDANCE COMMAND ----------------
+# ---- Attendance View ----
 class AttendanceView(View):
     def __init__(self, user):
         super().__init__(timeout=180)
@@ -77,15 +80,59 @@ class AttendanceView(View):
         self.stop()
 
     async def mark_attendance(self, status, reason=""):
-        now = datetime.now()
+        now = datetime.now(pytz.timezone("Asia/Kolkata"))  # Set timezone
         timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
         row = [self.user.display_name, self.user.name, status, reason, timestamp]
         sheet.append_row(row)
 
+
+# ---- Manual Command ----
 @bot.command()
 async def attendance(ctx):
-    view = AttendanceView(ctx.author)
-    await ctx.send(f"📋 {ctx.author.mention}, kindly mark your attendance:", view=view)
+    user = ctx.author
+    channel = ctx.channel
+
+    expected_channel_name = f"intern-{user.name.lower()}"
+    if channel.name != expected_channel_name:
+        await ctx.send("⚠️ You can only mark attendance in your own intern channel.")
+        return
+
+    view = AttendanceView(user)
+    await ctx.send(f"📋 {user.mention}, kindly mark your attendance:", view=view)
+
+
+# ---- Daily Scheduler ----
+@tasks.loop(time=time(hour=9, tzinfo=pytz.timezone("Asia/Kolkata")))
+async def send_daily_attendance():
+    guild = bot.get_guild(YOUR_GUILD_ID)  # 🔁 Replace with your actual guild ID
+
+    for channel in guild.text_channels:
+        if not channel.name.startswith("intern-"):
+            continue
+
+        username = channel.name.replace("intern-", "").lower()
+        intern = discord.utils.get(guild.members, name=username)
+
+        if intern:
+            try:
+                view = AttendanceView(intern)
+                await channel.send(f"📋 Good Morning {intern.mention}, please mark your attendance:", view=view)
+            except Exception as e:
+                print(f"Error sending attendance to {channel.name}: {e}")
+
+
+@send_daily_attendance.before_loop
+async def before_attendance():
+    await bot.wait_until_ready()
+    print("✅ Attendance scheduler is ready.")
+
+
+# ---- Bot Startup ----
+@bot.event
+async def on_ready():
+    print(f"✅ Logged in as {bot.user}")
+    send_daily_attendance.start()
+
 
 # ---------------- YOUR EXISTING COMMANDS (UNCHANGED) ----------------
 # [All your previous bot commands go here unchanged: !register, !command, !hello, !resources, cleanup, etc.]
