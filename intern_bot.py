@@ -374,6 +374,15 @@ async def delete_old_commands():
 
 
 
+@bot.command(name="clear")
+@commands.has_permissions(manage_messages=True)  # Optional: Restrict to mods/admins
+async def clear(ctx, amount: int):
+    if amount <= 0:
+        await ctx.send("⚠️ Please enter a number greater than 0.")
+        return
+
+    deleted = await ctx.channel.purge(limit=amount + 1)  # +1 includes the command message itself
+    await ctx.send(f"🧹 Deleted {len(deleted)-1} messages!", delete_after=3)
 
 
 
