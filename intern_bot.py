@@ -93,7 +93,8 @@ async def attendance(ctx):
     user = ctx.author
     channel = ctx.channel
 
-    expected_channel_name = f"intern-{user.name.lower()}"
+    # expected_channel_name = f"intern-{user.name.lower().replace(' ', '-')}"
+    expected_channel_name = f"intern-{user.id}"
     if channel.name != expected_channel_name:
         await ctx.send("⚠️ You can only mark attendance in your own intern channel.")
         return
@@ -143,7 +144,7 @@ async def on_ready():
 
 # ---------------- RUN BOT ----------------
 
-bot = commands.Bot(command_prefix='!', intents=intents)
+
 
 # Set your admin role name and category name for private channels
 ADMIN_ROLE_NAME = "Admin"
