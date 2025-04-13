@@ -89,41 +89,48 @@ class AttendanceView(View):
 
 
 
-    async def mark_attendance(self, status, reason=""):
-        now = datetime.now(pytz.timezone("Asia/Kolkata"))
-        today_str = now.strftime("%Y-%m-%d")
-        timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
-        row_data = [self.user.display_name, self.user.name, status, reason, timestamp]
+from gspread_formatting import (
+    CellFormat, Color, TextFormat, set_frozen, format_cell_range, set_column_width
+)
 
-        worksheet = sheet
-        all_values = worksheet.get_all_values()
+async def mark_attendance(self, status, reason=""):
+    now = datetime.now(pytz.timezone("Asia/Kolkata"))
+    today_str = now.strftime("%Y-%m-%d")
+    timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
+    row_data = [self.user.display_name, self.user.name, status, reason, timestamp]
 
-        # Apply header only if sheet is empty
-        if not all_values:
-            headers = ["Display Name", "Username", "Status", "Reason", "Timestamp"]
-            worksheet.append_row(headers)
+    worksheet = sheet
+    all_values = worksheet.get_all_values()
 
-            header_format = CellFormat(
-                backgroundColor=Color(0.9, 0.9, 0.9),
-                textFormat=TextFormat(bold=True),
-            )
-            format_cell_range(worksheet, 'A1:E1', header_format)
-            set_frozen(worksheet, rows=1)
+    # ✅ Write header if it's missing
+    if not all_values or all_values[0] != ["Display Name", "Username", "Status", "Reason", "Timestamp"]:
+        headers = ["Display Name", "Username", "Status", "Reason", "Timestamp"]
+        worksheet.insert_row(headers, index=1)
 
-            for i, width in enumerate([150, 150, 100, 300, 180], start=1):
-                set_column_width(worksheet, i, width)
+        # Format header
+        header_format = CellFormat(
+            backgroundColor=Color(0.9, 0.9, 0.9),  # Light gray
+            textFormat=TextFormat(bold=True),
+        )
+        format_cell_range(worksheet, 'A1:E1', header_format)
+        set_frozen(worksheet, rows=1)
 
-        # Check if today's date is already present
-        date_label = f"Date: {today_str}"
-        rows = worksheet.get_all_values()
-        date_rows = [i for i, row in enumerate(rows) if row and row[0] == date_label]
+        # Set column widths (adjust as needed)
+        for i, width in enumerate([150, 150, 100, 300, 200], start=1):
+            set_column_width(worksheet, i, width)
 
-        if not date_rows:
-            # Append gap + date row + actual data
-            worksheet.append_row([])  # Blank line gap
-            worksheet.append_row([date_label])  # Date header
-        # Then append the user’s row
-        worksheet.append_row(row_data)
+    # ✅ Insert Date row if needed
+    date_label = f"Date: {today_str}"
+    existing_rows = worksheet.get_all_values()
+    date_rows = [i for i, row in enumerate(existing_rows) if row and row[0] == date_label]
+
+    if not date_rows:
+        worksheet.append_row([])  # Add a blank row for spacing
+        worksheet.append_row([date_label])  # Add date label (only in col A)
+
+    # ✅ Add attendance entry
+    worksheet.append_row(row_data)
+
 
 
 
