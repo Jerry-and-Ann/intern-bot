@@ -113,17 +113,17 @@ class AttendanceView(View):
             for i, width in enumerate([150, 150, 100, 300, 180], start=1):
                 set_column_width(worksheet, i, width)
 
-    # Check if today's date is already present
-    date_label = f"Date: {today_str}"
-    rows = worksheet.get_all_values()
-    date_rows = [i for i, row in enumerate(rows) if row and row[0] == date_label]
+        # Check if today's date is already present
+        date_label = f"Date: {today_str}"
+        rows = worksheet.get_all_values()
+        date_rows = [i for i, row in enumerate(rows) if row and row[0] == date_label]
 
-    if not date_rows:
-        # Append gap + date row + actual data
-        worksheet.append_row([])  # Blank line gap
-        worksheet.append_row([date_label])  # Date header
-    # Then append the user’s row
-    worksheet.append_row(row_data)
+        if not date_rows:
+            # Append gap + date row + actual data
+            worksheet.append_row([])  # Blank line gap
+            worksheet.append_row([date_label])  # Date header
+        # Then append the user’s row
+        worksheet.append_row(row_data)
 
 
 
