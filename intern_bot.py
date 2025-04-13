@@ -343,7 +343,7 @@ async def hello(ctx):
     **Welcome aboard, {user.display_name}! You’ve got this! 🌟**
     """
 
-    msg = await welcome_channel.send(welcome_text)
+    msg = await welcome_channel.send(welcome_text, delete_after=60)
     await msg.add_reaction("💙")
 
     # Try DMing the user
