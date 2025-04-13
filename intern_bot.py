@@ -13,6 +13,11 @@ import pytz
 from google_sheets import sheet  # Import sheet object from google_sheets.py
 from gspread_formatting.dataframe import format_with_dataframe
 
+from gspread_formatting import (
+    CellFormat, Color, TextFormat, set_frozen, format_cell_range, set_column_width
+)
+from gspread_formatting.dataframe import format_with_dataframe
+
 app = Flask('')
 
 @app.route('/')
@@ -81,25 +86,23 @@ class AttendanceView(View):
         await interaction.response.send_message("😶 Marked as No Response.", ephemeral=True)
         self.stop()
 
-    from gspread_formatting import (
-        CellFormat, Color, TextFormat, set_frozen, format_cell_range, set_column_width
-    )
-    from gspread_formatting.dataframe import format_with_dataframe
+
 
 
     async def mark_attendance(self, status, reason=""):
-        now = datetime.now(pytz.timezone("Asia/Kolkata"))  # Set timezone
+        now = datetime.now(pytz.timezone("Asia/Kolkata"))
+        today_str = now.strftime("%Y-%m-%d")
         timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
-        row = [self.user.display_name, self.user.name, status, reason, timestamp]
+        row_data = [self.user.display_name, self.user.name, status, reason, timestamp]
 
-        worksheet = sheet  # assuming `sheet` is already your authorized worksheet
+        worksheet = sheet
+        all_values = worksheet.get_all_values()
 
-        # Check and write headers only once
-        if worksheet.row_count == 0 or not worksheet.get_all_values():
+        # Apply header only if sheet is empty
+        if not all_values:
             headers = ["Display Name", "Username", "Status", "Reason", "Timestamp"]
             worksheet.append_row(headers)
 
-            # Apply formatting to header row
             header_format = CellFormat(
                 backgroundColor=Color(0.9, 0.9, 0.9),
                 textFormat=TextFormat(bold=True),
@@ -107,12 +110,21 @@ class AttendanceView(View):
             format_cell_range(worksheet, 'A1:E1', header_format)
             set_frozen(worksheet, rows=1)
 
-            # Optionally set column widths
             for i, width in enumerate([150, 150, 100, 300, 180], start=1):
                 set_column_width(worksheet, i, width)
 
-        # Add the attendance entry
-        worksheet.append_row(row)
+    # Check if today's date is already present
+    date_label = f"Date: {today_str}"
+    rows = worksheet.get_all_values()
+    date_rows = [i for i, row in enumerate(rows) if row and row[0] == date_label]
+
+    if not date_rows:
+        # Append gap + date row + actual data
+        worksheet.append_row([])  # Blank line gap
+        worksheet.append_row([date_label])  # Date header
+    # Then append the user’s row
+    worksheet.append_row(row_data)
+
 
 
 
