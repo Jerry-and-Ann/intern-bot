@@ -153,7 +153,7 @@ async def attendance(ctx):
 # ---- Daily Scheduler ----
 @tasks.loop(time=time(hour=9, tzinfo=pytz.timezone("Asia/Kolkata")))
 async def send_daily_attendance():
-    guild = bot.get_guild(1359440218901581887)  # 🔁 Replace with your actual guild ID
+    guild = bot.get_guild(1360542451378688062)  # 🔁 Replace with your actual guild ID
 
     for channel in guild.text_channels:
         if not channel.name.startswith("intern-"):
