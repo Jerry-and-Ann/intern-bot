@@ -182,14 +182,14 @@ async def send_attendance_prompts(guild, category_id, skip_marked=False):
 
 @tasks.loop(time=time(hour=9, tzinfo=pytz.timezone("Asia/Kolkata")))
 async def morning_attendance():
-    guild = bot.get_guild(1360542451378688062)
+    guild = bot.get_guild(1359440218901581887)
     marked_attendance.clear()  # Reset for the day
-    await send_attendance_prompts(guild, category_id=123456789012345678)  # Replace with your actual category ID
+    await send_attendance_prompts(guild, category_id=1360542451378688062)  # Replace with your actual category ID
 
 @tasks.loop(time=time(hour=16, tzinfo=pytz.timezone("Asia/Kolkata")))
 async def afternoon_attendance():
-    guild = bot.get_guild(1360542451378688062)
-    await send_attendance_prompts(guild, category_id=123456789012345678, skip_marked=True)
+    guild = bot.get_guild(1359440218901581887)
+    await send_attendance_prompts(guild, category_id=1360542451378688062, skip_marked=True)
 
     # # ---- Daily Scheduler ----
 # @tasks.loop(time=time(hour=9, tzinfo=pytz.timezone("Asia/Kolkata")))
