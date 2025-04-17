@@ -40,6 +40,7 @@ intents.messages = True
 intents.guilds = True
 intents.message_content = True
 intents.members = True
+marked_attendance = set()
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
@@ -100,6 +101,7 @@ class AttendanceView(View):
 
         worksheet = sheet
         all_values = worksheet.get_all_values()
+        
 
         # ✅ Write header if it's missing
         if not all_values or all_values[0] != ["Display Name", "Username", "Status", "Reason", "Timestamp"]:
@@ -129,6 +131,8 @@ class AttendanceView(View):
 
         # ✅ Add attendance entry
         worksheet.append_row(row_data)
+        marked_attendance.add(self.user.name.lower())  # Track who marked attendance
+
 
 
 
@@ -150,37 +154,74 @@ async def attendance(ctx):
 
 
 
-# ---- Daily Scheduler ----
-@tasks.loop(time=time(hour=9, tzinfo=pytz.timezone("Asia/Kolkata")))
-async def send_daily_attendance():
-    guild = bot.get_guild(1360542451378688062)  # 🔁 Replace with your actual guild ID
 
-    for channel in guild.text_channels:
+
+async def send_attendance_prompts(guild, category_id, skip_marked=False):
+    category = discord.utils.get(guild.categories, id=category_id)
+    if not category:
+        print("⚠️ Category not found.")
+        return
+
+    for channel in category.text_channels:
         if not channel.name.startswith("intern-"):
             continue
 
         username = channel.name.replace("intern-", "").lower()
-        intern = discord.utils.get(guild.members, name=username)
+        if skip_marked and username in marked_attendance:
+            continue  # Skip if already marked
 
+        intern = discord.utils.get(guild.members, name=username)
         if intern:
             try:
                 view = AttendanceView(intern)
-                await channel.send(f"📋 Good Morning {intern.mention}, please mark your attendance:", view=view)
+                await channel.send(f"📋 Good {'Afternoon' if skip_marked else 'Morning'} {intern.mention}, please mark your attendance:", view=view)
             except Exception as e:
                 print(f"Error sending attendance to {channel.name}: {e}")
 
 
-@send_daily_attendance.before_loop
-async def before_attendance():
-    await bot.wait_until_ready()
-    print("✅ Attendance scheduler is ready.")
+
+@tasks.loop(time=time(hour=9, tzinfo=pytz.timezone("Asia/Kolkata")))
+async def morning_attendance():
+    guild = bot.get_guild(1360542451378688062)
+    marked_attendance.clear()  # Reset for the day
+    await send_attendance_prompts(guild, category_id=123456789012345678)  # Replace with your actual category ID
+
+@tasks.loop(time=time(hour=16, tzinfo=pytz.timezone("Asia/Kolkata")))
+async def afternoon_attendance():
+    guild = bot.get_guild(1360542451378688062)
+    await send_attendance_prompts(guild, category_id=123456789012345678, skip_marked=True)
+
+    # # ---- Daily Scheduler ----
+# @tasks.loop(time=time(hour=9, tzinfo=pytz.timezone("Asia/Kolkata")))
+# async def send_daily_attendance():
+#     guild = bot.get_guild(1360542451378688062)  # 🔁 Replace with your actual guild ID
+
+#     for channel in guild.text_channels:
+#         if not channel.name.startswith("intern-"):
+#             continue
+
+#         username = channel.name.replace("intern-", "").lower()
+#         intern = discord.utils.get(guild.members, name=username)
+
+#         if intern:
+#             try:
+#                 view = AttendanceView(intern)
+#                 await channel.send(f"📋 Good Morning {intern.mention}, please mark your attendance:", view=view)
+#             except Exception as e:
+#                 print(f"Error sending attendance to {channel.name}: {e}")
+
+# @send_daily_attendance.before_loop
+# async def before_attendance():
+#     await bot.wait_until_ready()
+#     print("✅ Attendance scheduler is ready.")
 
 
 # ---- Bot Startup ----
 @bot.event
 async def on_ready():
     print(f"✅ Logged in as {bot.user}")
-    send_daily_attendance.start()
+    morning_attendance.start()
+    afternoon_attendance.start()
 
 
 # ---------------- YOUR EXISTING COMMANDS (UNCHANGED) ----------------
